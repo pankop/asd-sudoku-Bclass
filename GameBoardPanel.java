@@ -28,6 +28,11 @@ public class GameBoardPanel extends JPanel {
     /** It also contains a Puzzle with array numbers and isGiven */
     private Puzzle puzzle = new Puzzle();
 
+    // Theme colors
+    private Color gridLineColor = Color.BLACK;
+    private Color lightGridLineColor = Color.LIGHT_GRAY;
+    private Color backgroundColor = Color.WHITE;
+
     /** Constructor */
     public GameBoardPanel() {
         super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));
@@ -37,35 +42,34 @@ public class GameBoardPanel extends JPanel {
                 cells[row][col] = new Cell(row, col);
 
                 // Tambahkan border khusus untuk pemisah kotak 3x3
-                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, Color.BLACK);
-                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK);
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
 
                 if (col > 0 && col % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
                             thickBorderVertical,
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
                 if (row > 0 && row % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
                             thickBorderHorizontal,
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
                 // Untuk sel di pojok kiri atas setiap kotak 3x3
                 if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(2, 2, 0, 0, Color.BLACK),
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
                 super.add(cells[row][col]);
             }
         }
-
 
         // [TODO 3] Allocate a common listener as the ActionEvent listener for all the
         //  Cells (JTextFields)
@@ -81,6 +85,7 @@ public class GameBoardPanel extends JPanel {
         }
 
         super.setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
+        setBackground(backgroundColor);
     }
 
     /**
@@ -154,6 +159,56 @@ public class GameBoardPanel extends JPanel {
         cells[row][col].paint();
 
         return true;
+    }
+
+    /**
+     * Update the theme colors based on dark mode state
+     * @param isDarkMode true for dark mode, false for light mode
+     */
+    public void updateTheme(boolean isDarkMode) {
+        // Update colors based on theme
+        gridLineColor = isDarkMode ? Color.WHITE : Color.BLACK;
+        lightGridLineColor = isDarkMode ? new Color(100, 100, 100) : Color.LIGHT_GRAY;
+        backgroundColor = isDarkMode ? new Color(50, 50, 50) : Color.WHITE;
+
+        // Update panel background
+        setBackground(backgroundColor);
+
+        // Update all cells
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                // Update cell borders
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
+
+                if (col > 0 && col % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderVertical,
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                if (row > 0 && row % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderHorizontal,
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                // Update cell colors
+                cells[row][col].updateTheme(isDarkMode);
+            }
+        }
+
+        // Repaint the panel
+        repaint();
     }
 
     // [TODO 2] Define a Listener Inner Class for all the editable Cells

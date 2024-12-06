@@ -23,12 +23,22 @@ public class Sudoku extends JFrame {
     GameBoardPanel board = new GameBoardPanel();
     JButton btnNewGame = new JButton("Reset");
     JButton btnHint = new JButton("Hint (3)");  // Add hint button with initial count
+    JButton btnDarkMode = new JButton("Dark Mode"); // Add Dark Mode toggle button
     JComboBox<String> levelSelector;
     JPanel buttonPanel = new JPanel();
     private Timer gameTimer;
     private JLabel timerLabel;
     private int secondsElapsed;
     private int hintsRemaining = 3;  // Track remaining hints
+    private boolean isDarkMode = false; // Track dark mode state
+
+    // Colors for themes
+    private final Color LIGHT_BG = new Color(255, 255, 255);
+    private final Color LIGHT_TEXT = new Color(0, 0, 0);
+    private final Color DARK_BG = new Color(50, 50, 50);
+    private final Color DARK_TEXT = new Color(255, 255, 255);
+    private final Color DARK_BUTTON_BG = new Color(100, 100, 100);
+    private final Color LIGHT_BUTTON_BG = new Color(230, 230, 230);
 
     // Constructor
     public Sudoku() {
@@ -48,12 +58,18 @@ public class Sudoku extends JFrame {
         timerLabel = new JLabel("Time: 00:00");
         initializeTimer();
 
+        // Style buttons
+        styleButton(btnNewGame);
+        styleButton(btnHint);
+        styleButton(btnDarkMode);
+
         // Add components to button panel
         buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(new JLabel("Difficulty: "));
         buttonPanel.add(levelSelector);
         buttonPanel.add(btnNewGame);
-        buttonPanel.add(btnHint);  // Add hint button to panel
+        buttonPanel.add(btnHint);
+        buttonPanel.add(btnDarkMode);
         buttonPanel.add(timerLabel);
 
         // Add button panel to the south
@@ -65,6 +81,9 @@ public class Sudoku extends JFrame {
         // Add action listener for Hint button
         btnHint.addActionListener(e -> giveHint());
 
+        // Add action listener for Dark Mode button
+        btnDarkMode.addActionListener(e -> toggleDarkMode());
+
         // Initialize the game board to start the game
         startNewGame();
 
@@ -72,6 +91,21 @@ public class Sudoku extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
         setTitle("Sudoku");
         setVisible(true);
+    }
+
+    // Helper method to style buttons
+    private void styleButton(JButton button) {
+        button.setOpaque(true);
+        button.setBorderPainted(true);
+        button.setFocusPainted(false);
+        button.setBackground(LIGHT_BUTTON_BG);
+        button.setForeground(LIGHT_TEXT);
+
+        // Add custom styling
+        button.putClientProperty("JButton.buttonType", "roundRect");
+
+        // Set font
+        button.setFont(new Font("Arial", Font.BOLD, 12));
     }
 
     // Start a new game based on selected difficulty
@@ -141,6 +175,60 @@ public class Sudoku extends JFrame {
                 }
             }
         }
+    }
+
+    // Toggle between light and dark mode
+    private void toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+        updateTheme();
+        btnDarkMode.setText(isDarkMode ? "Light Mode" : "Dark Mode");
+    }
+
+    // Update the theme colors
+    private void updateTheme() {
+        Color bgColor = isDarkMode ? DARK_BG : LIGHT_BG;
+        Color textColor = isDarkMode ? DARK_TEXT : LIGHT_TEXT;
+        Color buttonBgColor = isDarkMode ? DARK_BUTTON_BG : LIGHT_BUTTON_BG;
+
+        // Update main container
+        Container cp = getContentPane();
+        cp.setBackground(bgColor);
+
+        // Update button panel
+        buttonPanel.setBackground(bgColor);
+
+        // Update components
+        Component[] components = buttonPanel.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof JLabel) {
+                ((JLabel) comp).setForeground(textColor);
+            } else if (comp instanceof JButton) {
+                JButton button = (JButton) comp;
+                button.setBackground(buttonBgColor);
+                button.setForeground(textColor);
+                button.setOpaque(true);
+                button.setBorderPainted(true);
+                // Add a subtle border for better visibility
+                button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(isDarkMode ? DARK_TEXT : LIGHT_TEXT, 1),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                ));
+            } else if (comp instanceof JComboBox) {
+                JComboBox<?> comboBox = (JComboBox<?>) comp;
+                comboBox.setBackground(buttonBgColor);
+                comboBox.setForeground(textColor);
+                ((JLabel)comboBox.getRenderer()).setForeground(textColor);
+            }
+        }
+
+        // Update timer label
+        timerLabel.setForeground(textColor);
+
+        // Update game board
+        board.updateTheme(isDarkMode);
+
+        // Refresh the UI
+        SwingUtilities.updateComponentTreeUI(this);
     }
 
     /** The entry main() entry method */
