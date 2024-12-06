@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
@@ -19,15 +20,42 @@ public class GameBoardPanel extends JPanel {
 
     /** Constructor */
     public GameBoardPanel() {
-        super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));  // JPanel
+        super.setLayout(new GridLayout(SudokuConstants.GRID_SIZE, SudokuConstants.GRID_SIZE));
 
-        // Allocate the 2D array of Cell, and added into JPanel.
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 cells[row][col] = new Cell(row, col);
-                super.add(cells[row][col]);   // JPanel
+
+                // Tambahkan border khusus untuk pemisah kotak 3x3
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, Color.BLACK);
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK);
+
+                if (col > 0 && col % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderVertical,
+                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                    ));
+                }
+
+                if (row > 0 && row % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderHorizontal,
+                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                    ));
+                }
+
+                // Untuk sel di pojok kiri atas setiap kotak 3x3
+                if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createMatteBorder(2, 2, 0, 0, Color.BLACK),
+                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                    ));
+                }
+
+                super.add(cells[row][col]);
             }
         }
+
 
         // [TODO 3] Allocate a common listener as the ActionEvent listener for all the
         //  Cells (JTextFields)
@@ -48,10 +76,11 @@ public class GameBoardPanel extends JPanel {
     /**
      * Generate a new puzzle; and reset the game board of cells based on the puzzle.
      * You can call this method to start a new game.
+     * @param cellsToGuess number of cells to guess (controls difficulty)
      */
-    public void newGame() {
+    public void newGame(int cellsToGuess) {
         // Generate a new puzzle
-        puzzle.newPuzzle(2);
+        puzzle.newPuzzle(cellsToGuess);
 
         // Initialize all the 9x9 cells, based on the puzzle.
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
@@ -59,6 +88,13 @@ public class GameBoardPanel extends JPanel {
                 cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
             }
         }
+    }
+
+    /**
+     * Generate a new puzzle with default difficulty (Easy)
+     */
+    public void newGame() {
+        newGame(36); // Default to Easy mode
     }
 
     /**
