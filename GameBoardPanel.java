@@ -19,9 +19,9 @@ public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
 
     // Define named constants for UI sizes
-    public static final int CELL_SIZE = 60;   // Cell width/height in pixels
-    public static final int BOARD_WIDTH  = CELL_SIZE * SudokuConstants.GRID_SIZE;
-    public static final int BOARD_HEIGHT = CELL_SIZE * SudokuConstants.GRID_SIZE;
+    public static final int CELL_SIZE = 65;   // Cell width/height in pixels
+    public static final int BOARD_WIDTH  = CELL_SIZE * SudokuConstants.GRID_SIZE + 20; // Added margin
+    public static final int BOARD_HEIGHT = CELL_SIZE * SudokuConstants.GRID_SIZE + 20; // Added margin
     // Board width/height in pixels
 
     // Define properties
@@ -31,8 +31,8 @@ public class GameBoardPanel extends JPanel {
 
     // Theme colors
     private Color gridLineColor = Color.BLACK;
-    private Color lightGridLineColor = Color.LIGHT_GRAY;
-    private Color backgroundColor = Color.WHITE;
+    private Color lightGridLineColor = new Color(180, 180, 180); // Slightly darker
+    private Color backgroundColor = new Color(250, 250, 250); // Slightly off-white
 
     /** Constructor */
     public GameBoardPanel() {
@@ -43,8 +43,8 @@ public class GameBoardPanel extends JPanel {
                 cells[row][col] = new Cell(row, col);
 
                 // Tambahkan border khusus untuk pemisah kotak 3x3
-                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
-                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 3, 0, 0, gridLineColor); // Thicker border
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(3, 0, 0, 0, gridLineColor); // Thicker border
 
                 if (col > 0 && col % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
@@ -62,7 +62,7 @@ public class GameBoardPanel extends JPanel {
 
                 if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createMatteBorder(3, 3, 0, 0, gridLineColor), // Thicker border
                             BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
@@ -167,8 +167,8 @@ public class GameBoardPanel extends JPanel {
     public void updateTheme(boolean isDarkMode) {
         // Update colors based on theme
         gridLineColor = isDarkMode ? Color.WHITE : Color.BLACK;
-        lightGridLineColor = isDarkMode ? new Color(100, 100, 100) : Color.LIGHT_GRAY;
-        backgroundColor = isDarkMode ? new Color(50, 50, 50) : Color.WHITE;
+        lightGridLineColor = isDarkMode ? new Color(100, 100, 100) : new Color(180, 180, 180);
+        backgroundColor = isDarkMode ? new Color(50, 50, 50) : new Color(250, 250, 250);
 
         // Update panel background
         setBackground(backgroundColor);
@@ -177,8 +177,8 @@ public class GameBoardPanel extends JPanel {
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 // Update cell borders
-                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
-                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 3, 0, 0, gridLineColor); // Thicker border
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(3, 0, 0, 0, gridLineColor); // Thicker border
 
                 if (col > 0 && col % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
@@ -196,7 +196,7 @@ public class GameBoardPanel extends JPanel {
 
                 if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createMatteBorder(3, 3, 0, 0, gridLineColor), // Thicker border
                             BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
