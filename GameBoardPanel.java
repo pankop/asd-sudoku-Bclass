@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
+import java.awt.event.KeyEvent; // Added import for KeyEvent
+import java.awt.event.KeyListener; // Added import for KeyListener
 
 public class GameBoardPanel extends JPanel {
     private static final long serialVersionUID = 1L;  // to prevent serial warning
@@ -23,10 +25,14 @@ public class GameBoardPanel extends JPanel {
     // Board width/height in pixels
 
     // Define properties
-    /** The game board composes of 9x9 Cells (customized JTextFields) */
     private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
-    /** It also contains a Puzzle with array numbers and isGiven */
     private Puzzle puzzle = new Puzzle();
+    private boolean isNoteMode = false;
+
+    // Theme colors
+    private Color gridLineColor = Color.BLACK;
+    private Color lightGridLineColor = Color.LIGHT_GRAY;
+    private Color backgroundColor = Color.WHITE;
 
     /** Constructor */
     public GameBoardPanel() {
@@ -37,28 +43,27 @@ public class GameBoardPanel extends JPanel {
                 cells[row][col] = new Cell(row, col);
 
                 // Tambahkan border khusus untuk pemisah kotak 3x3
-                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, Color.BLACK);
-                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK);
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
 
                 if (col > 0 && col % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
                             thickBorderVertical,
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
                 if (row > 0 && row % 3 == 0) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
                             thickBorderHorizontal,
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
-                // Untuk sel di pojok kiri atas setiap kotak 3x3
                 if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
                     cells[row][col].setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(2, 2, 0, 0, Color.BLACK),
-                            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
                     ));
                 }
 
@@ -66,21 +71,20 @@ public class GameBoardPanel extends JPanel {
             }
         }
 
-
-        // [TODO 3] Allocate a common listener as the ActionEvent listener for all the
-        //  Cells (JTextFields)
+        // Add a common listener for all cells
         CellInputListener listener = new CellInputListener();
 
-        // [TODO 4] Adds this common listener to all editable cells
+        // Add this common listener to all editable cells
         for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
             for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
                 if (cells[row][col].isEditable()) {
-                    cells[row][col].addActionListener(listener);   // For all editable rows and cols
+                    cells[row][col].addActionListener(listener);
                 }
             }
         }
 
         super.setPreferredSize(new Dimension(BOARD_WIDTH, BOARD_HEIGHT));
+        setBackground(backgroundColor);
     }
 
     /**
@@ -122,36 +126,154 @@ public class GameBoardPanel extends JPanel {
         return true;
     }
 
+    /**
+     * Show a hint by revealing a random empty cell
+     * @return true if a hint was given, false if no empty cells are available
+     */
+    public boolean showHint() {
+        // Create a list of empty cells
+        java.util.List<Point> emptyCells = new java.util.ArrayList<>();
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                if (cells[row][col].status == CellStatus.TO_GUESS) {
+                    emptyCells.add(new Point(row, col));
+                }
+            }
+        }
+
+        // If there are no empty cells, return false
+        if (emptyCells.isEmpty()) {
+            return false;
+        }
+
+        // Select a random empty cell
+        int randomIndex = (int)(Math.random() * emptyCells.size());
+        Point selectedCell = emptyCells.get(randomIndex);
+
+        // Reveal the correct number in the selected cell
+        int row = (int)selectedCell.getX();
+        int col = (int)selectedCell.getY();
+        cells[row][col].setText(String.valueOf(cells[row][col].number));
+        cells[row][col].status = CellStatus.CORRECT_GUESS;
+        cells[row][col].paint();
+
+        return true;
+    }
+
+    /**
+     * Update the theme colors based on dark mode state
+     * @param isDarkMode true for dark mode, false for light mode
+     */
+    public void updateTheme(boolean isDarkMode) {
+        // Update colors based on theme
+        gridLineColor = isDarkMode ? Color.WHITE : Color.BLACK;
+        lightGridLineColor = isDarkMode ? new Color(100, 100, 100) : Color.LIGHT_GRAY;
+        backgroundColor = isDarkMode ? new Color(50, 50, 50) : Color.WHITE;
+
+        // Update panel background
+        setBackground(backgroundColor);
+
+        // Update all cells
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                // Update cell borders
+                Border thickBorderVertical = BorderFactory.createMatteBorder(0, 2, 0, 0, gridLineColor);
+                Border thickBorderHorizontal = BorderFactory.createMatteBorder(2, 0, 0, 0, gridLineColor);
+
+                if (col > 0 && col % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderVertical,
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                if (row > 0 && row % 3 == 0) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            thickBorderHorizontal,
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                if ((col > 0 && col % 3 == 0) && (row > 0 && row % 3 == 0)) {
+                    cells[row][col].setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createMatteBorder(2, 2, 0, 0, gridLineColor),
+                            BorderFactory.createLineBorder(lightGridLineColor, 1)
+                    ));
+                }
+
+                // Update cell colors
+                cells[row][col].updateTheme(isDarkMode);
+            }
+        }
+
+        // Repaint the panel
+        repaint();
+    }
+
+    /**
+     * Clear all notes from cells
+     */
+    public void clearAllNotes() {
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                cells[row][col].clearNotes();
+            }
+        }
+    }
+
+    /**
+     * Clear notes when a number is entered
+     */
+    private void clearNotesOnInput(Cell cell) {
+        if (!cell.getText().isEmpty()) {
+            cell.clearNotes();
+        }
+    }
+
+    // Set note mode state
+    public void setNoteMode(boolean noteMode) {
+        this.isNoteMode = noteMode;
+    }
+
     // [TODO 2] Define a Listener Inner Class for all the editable Cells
     private class CellInputListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             // Get a reference of the JTextField that triggers this action event
-            Cell sourceCell = (Cell)e.getSource();
+            Cell sourceCell = (Cell) e.getSource();
 
-            // Retrieve the int entered
-            int numberIn;
-            try {
-                numberIn = Integer.parseInt(sourceCell.getText());
-                if (numberIn < 1 || numberIn > 9) {
-                    sourceCell.setText("");
+            // Retrieve the input String
+            String input = sourceCell.getText();
+
+            // Process the input
+            if (input.length() == 0) {
+                sourceCell.status = CellStatus.TO_GUESS;
+            } else if (input.length() == 1 && input.matches("[1-9]")) {
+                // If in note mode, toggle the note instead of setting the number
+                if (isNoteMode) {
+                    int noteNumber = Integer.parseInt(input);
+                    sourceCell.toggleNote(noteNumber);
+                    sourceCell.setText(""); // Clear the text field
                     return;
                 }
-            } catch (NumberFormatException ex) {
-                sourceCell.setText("");
-                return;
-            }
 
-            // For debugging
-            System.out.println("You entered " + numberIn);
-
-            // Check if the number is correct
-            if (numberIn == sourceCell.number) {
-                sourceCell.status = CellStatus.CORRECT_GUESS;
+                // Convert input String to int
+                int number = Integer.parseInt(input);
+                // Compare with the puzzle number
+                if (number == sourceCell.number) {
+                    sourceCell.status = CellStatus.CORRECT_GUESS;
+                } else {
+                    sourceCell.status = CellStatus.WRONG_GUESS;
+                }
             } else {
                 sourceCell.status = CellStatus.WRONG_GUESS;
             }
             sourceCell.paint();
+
+            // Clear notes when a number is entered (not in note mode)
+            if (!isNoteMode && !input.isEmpty()) {
+                clearNotesOnInput(sourceCell);
+            }
 
             // Check for duplicates and highlight them
             checkAndHighlightDuplicates();
