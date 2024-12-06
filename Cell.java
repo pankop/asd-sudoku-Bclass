@@ -59,6 +59,22 @@ public class Cell extends JTextField {
         // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
+
+        // Add key listener to filter input
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent e) {
+                char c = e.getKeyChar();
+                // Allow only digits 1-9
+                if (!(c >= '1' && c <= '9')) {
+                    e.consume(); // Ignore the event
+                    return;
+                }
+                // If there's already a digit, consume the event
+                if (!getText().isEmpty()) {
+                    e.consume();
+                }
+            }
+        });
     }
 
     /** Reset this cell for a new game, given the puzzle number and isGiven */
