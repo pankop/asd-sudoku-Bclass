@@ -1,5 +1,8 @@
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 /**
  * The main Sudoku program
  */
@@ -8,9 +11,12 @@ public class Sudoku extends JFrame {
 
     // private variables
     GameBoardPanel board = new GameBoardPanel();
-    JButton btnNewGame = new JButton("New Game");
+    JButton btnNewGame = new JButton("Reset");
     JComboBox<String> levelSelector;
     JPanel buttonPanel = new JPanel();
+    private Timer gameTimer;
+    private JLabel timerLabel;
+    private int secondsElapsed;
 
     // Constructor
     public Sudoku() {
@@ -26,11 +32,16 @@ public class Sudoku extends JFrame {
         // Add action listener to level selector for automatic game start
         levelSelector.addActionListener(e -> startNewGame());
 
+        // Initialize timer label
+        timerLabel = new JLabel("Time: 00:00");
+        initializeTimer();
+
         // Add components to button panel
         buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(new JLabel("Difficulty: "));
         buttonPanel.add(levelSelector);
         buttonPanel.add(btnNewGame);
+        buttonPanel.add(timerLabel);
 
         // Add button panel to the south
         cp.add(buttonPanel, BorderLayout.SOUTH);
@@ -67,6 +78,34 @@ public class Sudoku extends JFrame {
         }
 
         board.newGame(cellsToGuess);
+        resetTimer();
+    }
+
+    // Initialize the timer
+    private void initializeTimer() {
+        secondsElapsed = 0;
+        gameTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                secondsElapsed++;
+                updateTimerLabel();
+            }
+        });
+    }
+
+    // Reset and start the timer
+    private void resetTimer() {
+        gameTimer.stop();
+        secondsElapsed = 0;
+        updateTimerLabel();
+        gameTimer.start();
+    }
+
+    // Update the timer display
+    private void updateTimerLabel() {
+        int minutes = secondsElapsed / 60;
+        int seconds = secondsElapsed % 60;
+        timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
     }
 
     /** The entry main() entry method */
