@@ -22,11 +22,13 @@ public class Sudoku extends JFrame {
     // private variables
     GameBoardPanel board = new GameBoardPanel();
     JButton btnNewGame = new JButton("Reset");
+    JButton btnHint = new JButton("Hint (3)");  // Add hint button with initial count
     JComboBox<String> levelSelector;
     JPanel buttonPanel = new JPanel();
     private Timer gameTimer;
     private JLabel timerLabel;
     private int secondsElapsed;
+    private int hintsRemaining = 3;  // Track remaining hints
 
     // Constructor
     public Sudoku() {
@@ -51,6 +53,7 @@ public class Sudoku extends JFrame {
         buttonPanel.add(new JLabel("Difficulty: "));
         buttonPanel.add(levelSelector);
         buttonPanel.add(btnNewGame);
+        buttonPanel.add(btnHint);  // Add hint button to panel
         buttonPanel.add(timerLabel);
 
         // Add button panel to the south
@@ -58,6 +61,9 @@ public class Sudoku extends JFrame {
 
         // Add action listener for New Game button
         btnNewGame.addActionListener(e -> startNewGame());
+
+        // Add action listener for Hint button
+        btnHint.addActionListener(e -> giveHint());
 
         // Initialize the game board to start the game
         startNewGame();
@@ -89,6 +95,11 @@ public class Sudoku extends JFrame {
 
         board.newGame(cellsToGuess);
         resetTimer();
+
+        // Reset hints when starting new game
+        hintsRemaining = 3;
+        btnHint.setText("Hint (" + hintsRemaining + ")");
+        btnHint.setEnabled(true);
     }
 
     // Initialize the timer
@@ -116,6 +127,20 @@ public class Sudoku extends JFrame {
         int minutes = secondsElapsed / 60;
         int seconds = secondsElapsed % 60;
         timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+    }
+
+    // Give a hint to the player
+    private void giveHint() {
+        if (hintsRemaining > 0) {
+            boolean hintGiven = board.showHint();
+            if (hintGiven) {
+                hintsRemaining--;
+                btnHint.setText("Hint (" + hintsRemaining + ")");
+                if (hintsRemaining == 0) {
+                    btnHint.setEnabled(false);
+                }
+            }
+        }
     }
 
     /** The entry main() entry method */

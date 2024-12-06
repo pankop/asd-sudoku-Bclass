@@ -122,6 +122,40 @@ public class GameBoardPanel extends JPanel {
         return true;
     }
 
+    /**
+     * Show a hint by revealing a random empty cell
+     * @return true if a hint was given, false if no empty cells are available
+     */
+    public boolean showHint() {
+        // Create a list of empty cells
+        java.util.List<Point> emptyCells = new java.util.ArrayList<>();
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                if (cells[row][col].status == CellStatus.TO_GUESS) {
+                    emptyCells.add(new Point(row, col));
+                }
+            }
+        }
+
+        // If there are no empty cells, return false
+        if (emptyCells.isEmpty()) {
+            return false;
+        }
+
+        // Select a random empty cell
+        int randomIndex = (int)(Math.random() * emptyCells.size());
+        Point selectedCell = emptyCells.get(randomIndex);
+
+        // Reveal the correct number in the selected cell
+        int row = (int)selectedCell.getX();
+        int col = (int)selectedCell.getY();
+        cells[row][col].setText(String.valueOf(cells[row][col].number));
+        cells[row][col].status = CellStatus.CORRECT_GUESS;
+        cells[row][col].paint();
+
+        return true;
+    }
+
     // [TODO 2] Define a Listener Inner Class for all the editable Cells
     private class CellInputListener implements ActionListener {
         @Override
