@@ -1,3 +1,13 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #1
+ * 1 - 5026231082 - Naufal Zaky Nugraha
+ * 2 - 5026231035 - Aldani Prasetyo
+ * 3 - 5026231183 - Asrid Meilendra
+ */
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -120,29 +130,82 @@ public class GameBoardPanel extends JPanel {
             Cell sourceCell = (Cell)e.getSource();
 
             // Retrieve the int entered
-            int numberIn = Integer.parseInt(sourceCell.getText());
+            int numberIn;
+            try {
+                numberIn = Integer.parseInt(sourceCell.getText());
+                if (numberIn < 1 || numberIn > 9) {
+                    sourceCell.setText("");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                sourceCell.setText("");
+                return;
+            }
+
             // For debugging
             System.out.println("You entered " + numberIn);
 
-            /*
-             * [TODO 5] (later - after TODO 3 and 4)
-             * Check the numberIn against sourceCell.number.
-             * Update the cell status sourceCell.status,
-             * and re-paint the cell via sourceCell.paint().
-             */
+            // Check if the number is correct
             if (numberIn == sourceCell.number) {
                 sourceCell.status = CellStatus.CORRECT_GUESS;
             } else {
                 sourceCell.status = CellStatus.WRONG_GUESS;
             }
-            sourceCell.paint();   // re-paint this cell based on its status
+            sourceCell.paint();
 
-            /*
-             * [TODO 6] (later)
-             * Check if the player has solved the puzzle after this move,
-             *   by calling isSolved(). Put up a congratulation JOptionPane, if so.
-             */
-            if(isSolved()) JOptionPane.showMessageDialog(null, "Congratulation!");
+            // Check for duplicates and highlight them
+            checkAndHighlightDuplicates();
+
+            // Check if solved
+            if(isSolved()) {
+                JOptionPane.showMessageDialog(null, "Congratulation!");
+            }
+        }
+    }
+
+    // Check for duplicates in row, column and 3x3 box
+    private void checkAndHighlightDuplicates() {
+        // Reset all cells to their original colors first
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                cells[row][col].setDuplicate(false);
+            }
+        }
+
+        // Check for duplicates
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+                String currentValue = cells[row][col].getText();
+                if (!currentValue.isEmpty()) {
+                    // Check row
+                    for (int c = 0; c < SudokuConstants.GRID_SIZE; c++) {
+                        if (c != col && cells[row][c].getText().equals(currentValue)) {
+                            cells[row][col].setDuplicate(true);
+                            cells[row][c].setDuplicate(true);
+                        }
+                    }
+
+                    // Check column
+                    for (int r = 0; r < SudokuConstants.GRID_SIZE; r++) {
+                        if (r != row && cells[r][col].getText().equals(currentValue)) {
+                            cells[row][col].setDuplicate(true);
+                            cells[r][col].setDuplicate(true);
+                        }
+                    }
+
+                    // Check 3x3 box
+                    int boxRowStart = (row / 3) * 3;
+                    int boxColStart = (col / 3) * 3;
+                    for (int r = boxRowStart; r < boxRowStart + 3; r++) {
+                        for (int c = boxColStart; c < boxColStart + 3; c++) {
+                            if ((r != row || c != col) && cells[r][c].getText().equals(currentValue)) {
+                                cells[row][col].setDuplicate(true);
+                                cells[r][c].setDuplicate(true);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

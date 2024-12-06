@@ -1,3 +1,13 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #1
+ * 1 - 5026231082 - Naufal Zaky Nugraha
+ * 2 - 5026231035 - Aldani Prasetyo
+ * 3 - 5026231183 - Asrid Meilendra
+ */
+
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JTextField;
@@ -16,6 +26,7 @@ public class Cell extends JTextField {
     public static final Color BG_TO_GUESS  = Color.YELLOW;
     public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
     public static final Color BG_WRONG_GUESS   = new Color(216, 0, 0);
+    public static final Color BG_DUPLICATE = new Color(255, 165, 0); // Orange color for duplicates
     public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.PLAIN, 28);
 
     // Define properties (package-visible)
@@ -61,6 +72,14 @@ public class Cell extends JTextField {
             super.setBackground(BG_CORRECT_GUESS);
         } else if (status == CellStatus.WRONG_GUESS) {    // from TO_GUESS
             super.setBackground(BG_WRONG_GUESS);
+        }
+    }
+
+    public void setDuplicate(boolean isDuplicate) {
+        if (isDuplicate && !getText().isEmpty()) {
+            super.setBackground(BG_DUPLICATE);
+        } else {
+            paint(); // Reset to original color
         }
     }
 }
